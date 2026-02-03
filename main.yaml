@@ -3,18 +3,22 @@ substitutions:
   # Choose target board: d1mini | wt32
   board: d1mini
 
-  # --- Tuning for keypad behaviors ---
+  # --- Tuning ---
   click_min_ms: 10ms
   click_max_ms: 400ms
   double_gap_ms: 200ms
   hold_ms: 600ms
   single_delay_ms: 180ms
 
+# --- Fallback so the parser always sees 'esphome:' even if hardware isn't merged yet ---
+esphome:
+  name: ${device_name}
+  friendly_name: ${device_name}
 
+# Load board-specific bits (now that the repo is checked out by the bootstrap)
 packages:
   hardware: !include hardware/${board}.yaml
   pins:     !include pins/${board}.yaml
-
 
 # ========= Core services =========
 logger:
