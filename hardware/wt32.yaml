@@ -1,1 +1,22 @@
 
+esphome:
+  name: ${device_name}
+  friendly_name: ${device_name}
+
+esp32:
+  board: esp32dev
+  framework: { type: arduino }
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  phy_addr: 1
+  power_pin: GPIO16
+  clk_mode: GPIO0_IN
+
+# Ethernet info
+text_sensor:
+  - platform: ethernet_info
+    ip_address:   { name: "${device_name} IP" }
+    mac_address:  { name: "${device_name} MAC" }
