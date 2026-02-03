@@ -1,1 +1,19 @@
+# WT32-ETH01 pin assignments — avoid Ethernet pins (GPIO0,16,18,23).
+# Note: GPIO32/33 are not boot-strap pins; external 4.7k pull-ups are safe & optional.
+# GPIO39 is input-only with NO internal pulls → add a 10k pull-up to 3V3 on the PCB if used.
 
+substitutions:
+  # Matrix rows (outputs; GPIO12 is a strap pin but fine as output post-boot)
+  ROW1_PIN: GPIO12
+  ROW2_PIN: GPIO14
+  ROW3_PIN: GPIO17
+
+  # Matrix columns (inputs)
+  COL1_PIN: GPIO4   # has internal pull-up
+  COL2_PIN: GPIO5   # has internal pull-up
+  COL3_PIN: GPIO39  # input-only, no internal pull → external 10k required
+  COL3_MODE: INPUT
+
+  # Encoder (quiet, interrupt-capable)
+  ENC_A_PIN: GPIO32
+  ENC_B_PIN: GPIO33
