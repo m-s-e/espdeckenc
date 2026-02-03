@@ -1,24 +1,21 @@
 substitutions:
   device_name: 3by3-espdeck-sg
-  # Choose target board: d1mini | wt32
-  board: d1mini
-
-  # --- Tuning ---
+  board: d1mini   # change to wt32 when needed
   click_min_ms: 10ms
   click_max_ms: 400ms
   double_gap_ms: 200ms
   hold_ms: 600ms
   single_delay_ms: 180ms
 
-# --- Fallback so the parser always sees 'esphome:' even if hardware isn't merged yet ---
+# Fallback; hardware file will override as packages merge (per docs merge rules)
 esphome:
   name: ${device_name}
   friendly_name: ${device_name}
 
-# Load board-specific bits (now that the repo is checked out by the bootstrap)
+# IMPORTANT: include only the chosen board (no relative includes here)
 packages:
-  hardware: !include hardware/${board}.yaml
-  pins:     !include pins/${board}.yaml
+  hardware: github://m-s-e/espdeckenc/hardware/${board}.yaml@<LATEST_COMMIT_SHA>
+  pins:     github://m-s-e/espdeckenc/pins/${board}.yaml@<LATEST_COMMIT_SHA>
 
 # ========= Core services =========
 logger:
