@@ -1,1 +1,238 @@
+substitutions:
+  device_name: 3by3-espdeck-sg
+  # Choose target board here: d1mini | wt32
+  board: d1mini
 
+  # --- Tuning for keypad behaviors ---
+  click_min_ms: 10ms
+  click_max_ms: 400ms
+  double_gap_ms: 200ms
+  hold_ms: 600ms
+  single_delay_ms: 180ms
+
+packages:
+  # Absolute URLs so there are ZERO local path issues.
+  hardware: !include https://raw.githubusercontent.com/m-s-e/espdeckenc/main/hardware/${board}.yaml
+  pins:     !include https://raw.githubusercontent.com/m-s-e/espdeckenc/main/pins/${board}.yaml
+
+# ========= Core services =========
+logger:
+api:
+ota:
+
+# ========= Matrix Keypad (3×3) =========
+matrix_keypad:
+  id: espdeck_keypad
+  rows:
+    - pin:
+        number: ${ROW1_PIN}
+        mode: OUTPUT
+    - pin:
+        number: ${ROW2_PIN}
+        mode: OUTPUT
+    - pin:
+        number: ${ROW3_PIN}
+        mode: OUTPUT
+  columns:
+    - pin:
+        number: ${COL1_PIN}
+        mode: INPUT_PULLUP
+    - pin:
+        number: ${COL2_PIN}
+        mode: INPUT_PULLUP
+    - pin:
+        number: ${COL3_PIN}
+        mode: ${COL3_MODE}
+  keys: ["1","2","3","4","5","6","7","8","9"]
+  debounce_ms: 5
+
+# Optional: shows last pressed key
+text_sensor:
+  - platform: matrix_keypad
+    name: "${device_name} Keypad"
+    id: keypad_text
+
+# ========= Single-click deferral scripts (doubles cancel pending single) =========
+script:
+  - id: defer_single_k1
+    mode: restart
+    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "1" } } ]
+  - id: defer_single_k2
+    mode: restart
+    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "2" } } ]
+  - id: defer_single_k3
+    mode: restart
+    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "3" } } ]
+  - id: defer_single_k4
+    mode: restart
+    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "4" } } ]
+  - id: defer_single_k5
+    mode: restart
+    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "5" } } ]
+  - id: defer_single_k6
+    mode: restart
+    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "6" } } ]
+  - id: defer_single_k7
+    mode: restart
+    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "7" } } ]
+  - id: defer_single_k8
+    mode: restart
+    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "8" } } ]
+  - id: defer_single_k9
+    mode: restart
+    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "9" } } ]
+
+# ========= Per-key handlers: single / double / hold =========
+binary_sensor:
+  # Map: (row,col) -> key label
+  # (0,0)->"1" (0,1)->"2" (0,2)->"3"
+  # (1,0)->"4" (1,1)->"5" (1,2)->"6"
+  # (2,0)->"7" (2,1)->"8" (2,2)->"9"
+
+  - platform: matrix_keypad
+    keypad_id: espdeck_keypad
+    id: key_1
+    row: 0
+    col: 0
+    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k1 ] }
+    on_multi_click:
+      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
+        then: [ { script.stop: defer_single_k1 }, { homeassistant.event: { event: keypad_double, data: { key: "1" } } } ]
+      - timing: [ "ON for at least ${hold_ms}" ]
+        then: [ { script.stop: defer_single_k1 }, { homeassistant.event: { event: keypad_hold, data: { key: "1" } } } ]
+
+  - platform: matrix_keypad
+    keypad_id: espdeck_keypad
+    id: key_2
+    row: 0
+    col: 1
+    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k2 ] }
+    on_multi_click:
+      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
+        then: [ { script.stop: defer_single_k2 }, { homeassistant.event: { event: keypad_double, data: { key: "2" } } } ]
+      - timing: [ "ON for at least ${hold_ms}" ]
+        then: [ { script.stop: defer_single_k2 }, { homeassistant.event: { event: keypad_hold, data: { key: "2" } } } ]
+
+  - platform: matrix_keypad
+    keypad_id: espdeck_keypad
+    id: key_3
+    row: 0
+    col: 2
+    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k3 ] }
+    on_multi_click:
+      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
+        then: [ { script.stop: defer_single_k3 }, { homeassistant.event: { event: keypad_double, data: { key: "3" } } } ]
+      - timing: [ "ON for at least ${hold_ms}" ]
+        then: [ { script.stop: defer_single_k3 }, { homeassistant.event: { event: keypad_hold, data: { key: "3" } } } ]
+
+  - platform: matrix_keypad
+    keypad_id: espdeck_keypad
+    id: key_4
+    row: 1
+    col: 0
+    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k4 ] }
+    on_multi_click:
+      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
+        then: [ { script.stop: defer_single_k4 }, { homeassistant.event: { event: keypad_double, data: { key: "4" } } } ]
+      - timing: [ "ON for at least ${hold_ms}" ]
+        then: [ { script.stop: defer_single_k4 }, { homeassistant.event: { event: keypad_hold, data: { key: "4" } } } ]
+
+  - platform: matrix_keypad
+    keypad_id: espdeck_keypad
+    id: key_5
+    row: 1
+    col: 1
+    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k5 ] }
+    on_multi_click:
+      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
+        then: [ { script.stop: defer_single_k5 }, { homeassistant.event: { event: keypad_double, data: { key: "5" } } } ]
+      - timing: [ "ON for at least ${hold_ms}" ]
+        then: [ { script.stop: defer_single_k5 }, { homeassistant.event: { event: keypad_hold, data: { key: "5" } } } ]
+
+  - platform: matrix_keypad
+    keypad_id: espdeck_keypad
+    id: key_6
+    row: 1
+    col: 2
+    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k6 ] }
+    on_multi_click:
+      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
+        then: [ { script.stop: defer_single_k6 }, { homeassistant.event: { event: keypad_double, data: { key: "6" } } } ]
+      - timing: [ "ON for at least ${hold_ms}" ]
+        then: [ { script.stop: defer_single_k6 }, { homeassistant.event: { event: keypad_hold, data: { key: "6" } } } ]
+
+  - platform: matrix_keypad
+    keypad_id: espdeck_keypad
+    id: key_7
+    row: 2
+    col: 0
+    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k7 ] }
+    on_multi_click:
+      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
+        then: [ { script.stop: defer_single_k7 }, { homeassistant.event: { event: keypad_double, data: { key: "7" } } } ]
+      - timing: [ "ON for at least ${hold_ms}" ]
+        then: [ { script.stop: defer_single_k7 }, { homeassistant.event: { event: keypad_hold, data: { key: "7" } } } ]
+
+  - platform: matrix_keypad
+    keypad_id: espdeck_keypad
+    id: key_8
+    row: 2
+    col: 1
+    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k8 ] }
+    on_multi_click:
+      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
+        then: [ { script.stop: defer_single_k8 }, { homeassistant.event: { event: keypad_double, data: { key: "8" } } } ]
+      - timing: [ "ON for at least ${hold_ms}" ]
+        then: [ { script.stop: defer_single_k8 }, { homeassistant.event: { event: keypad_hold, data: { key: "8" } } } ]
+
+  - platform: matrix_keypad
+    keypad_id: espdeck_keypad
+    id: key_9
+    row: 2
+    col: 2
+    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k9 ] }
+    on_multi_click:
+      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
+        then: [ { script.stop: defer_single_k9 }, { homeassistant.event: { event: keypad_double, data: { key: "9" } } } ]
+      - timing: [ "ON for at least ${hold_ms}" ]
+        then: [ { script.stop: defer_single_k9 }, { homeassistant.event: { event: keypad_hold, data: { key: "9" } } } ]
+
+# ========= Encoder: event-only (+1/-1 per tick) =========
+sensor:
+  - platform: rotary_encoder
+    id: encoder_raw
+    internal: true
+    pin_a:
+      number: ${ENC_A_PIN}
+      mode: INPUT_PULLUP
+    pin_b:
+      number: ${ENC_B_PIN}
+      mode: INPUT_PULLUP
+    resolution: 2
+    on_clockwise:
+      - homeassistant.event: { event: encoder_step, data: { delta: 1 } }
+    on_anticlockwise:
+      - homeassistant.event: { event: encoder_step, data: { delta: -1 } }
+
+  # Uptime (seconds)
+  - platform: uptime
+    name: "${device_name} Uptime Seconds"
+    id: uptime_seconds
+
+# ========= Uptime (formatted) =========
+text_sensor:
+  - platform: template
+    name: "${device_name} Uptime"
+    id: uptime_pretty
+    icon: mdi:clock-outline
+    update_interval: 60s
+    lambda: |-
+      if (!id(uptime_seconds).has_state()) return std::string("—");
+      uint32_t sec = (uint32_t) id(uptime_seconds).state;
+      uint32_t days = sec / 86400;   sec %= 86400;
+      uint32_t hours = sec / 3600;   sec %= 3600;
+      uint32_t mins = sec / 60;      sec %= 60;
+      char buf[32];
+      if (days > 0) snprintf(buf, sizeof(buf), "%ud %02u:%02u:%02u", days, hours, mins, sec);
+      else          snprintf(buf, sizeof(buf), "%02u:%02u:%02u", hours, mins, sec);
+      return std::string(buf);
