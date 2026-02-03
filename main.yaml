@@ -1,6 +1,6 @@
 substitutions:
   device_name: 3by3-espdeck-sg
-  # Choose target board here: d1mini | wt32
+  # Choose target board: d1mini | wt32
   board: d1mini
 
   # --- Tuning for keypad behaviors ---
@@ -11,9 +11,9 @@ substitutions:
   single_delay_ms: 180ms
 
 packages:
-  # Absolute URLs so there are ZERO local path issues.
-  hardware: !include https://raw.githubusercontent.com/m-s-e/espdeckenc/main/hardware/${board}.yaml
-  pins:     !include https://raw.githubusercontent.com/m-s-e/espdeckenc/main/pins/${board}.yaml
+  # GitHub shorthand (remote packages)
+  hardware: github://m-s-e/espdeckenc/hardware/${board}.yaml@main
+  pins:     github://m-s-e/espdeckenc/pins/${board}.yaml@main
 
 # ========= Core services =========
 logger:
@@ -21,6 +21,7 @@ api:
 ota:
 
 # ========= Matrix Keypad (3×3) =========
+# Uses ${ROWx_PIN}, ${COLx_PIN}, and ${COL3_MODE} from pins/<board>.yaml
 matrix_keypad:
   id: espdeck_keypad
   rows:
@@ -56,148 +57,372 @@ text_sensor:
 script:
   - id: defer_single_k1
     mode: restart
-    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "1" } } ]
+    then:
+      - delay: ${single_delay_ms}
+      - homeassistant.event:
+          event: keypad_single
+          data:
+            key: "1"
+
   - id: defer_single_k2
     mode: restart
-    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "2" } } ]
+    then:
+      - delay: ${single_delay_ms}
+      - homeassistant.event:
+          event: keypad_single
+          data:
+            key: "2"
+
   - id: defer_single_k3
     mode: restart
-    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "3" } } ]
+    then:
+      - delay: ${single_delay_ms}
+      - homeassistant.event:
+          event: keypad_single
+          data:
+            key: "3"
+
   - id: defer_single_k4
     mode: restart
-    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "4" } } ]
+    then:
+      - delay: ${single_delay_ms}
+      - homeassistant.event:
+          event: keypad_single
+          data:
+            key: "4"
+
   - id: defer_single_k5
     mode: restart
-    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "5" } } ]
+    then:
+      - delay: ${single_delay_ms}
+      - homeassistant.event:
+          event: keypad_single
+          data:
+            key: "5"
+
   - id: defer_single_k6
     mode: restart
-    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "6" } } ]
+    then:
+      - delay: ${single_delay_ms}
+      - homeassistant.event:
+          event: keypad_single
+          data:
+            key: "6"
+
   - id: defer_single_k7
     mode: restart
-    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "7" } } ]
+    then:
+      - delay: ${single_delay_ms}
+      - homeassistant.event:
+          event: keypad_single
+          data:
+            key: "7"
+
   - id: defer_single_k8
     mode: restart
-    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "8" } } ]
+    then:
+      - delay: ${single_delay_ms}
+      - homeassistant.event:
+          event: keypad_single
+          data:
+            key: "8"
+
   - id: defer_single_k9
     mode: restart
-    then: [ delay: ${single_delay_ms}, homeassistant.event: { event: keypad_single, data: { key: "9" } } ]
+    then:
+      - delay: ${single_delay_ms}
+      - homeassistant.event:
+          event: keypad_single
+          data:
+            key: "9"
 
 # ========= Per-key handlers: single / double / hold =========
 binary_sensor:
-  # Map: (row,col) -> key label
+  # Map:
   # (0,0)->"1" (0,1)->"2" (0,2)->"3"
   # (1,0)->"4" (1,1)->"5" (1,2)->"6"
   # (2,0)->"7" (2,1)->"8" (2,2)->"9"
 
+  # --- Key "1" (r0 c0) ---
   - platform: matrix_keypad
     keypad_id: espdeck_keypad
     id: key_1
     row: 0
     col: 0
-    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k1 ] }
+    on_click:
+      min_length: ${click_min_ms}
+      max_length: ${click_max_ms}
+      then:
+        - script.execute: defer_single_k1
     on_multi_click:
-      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
-        then: [ { script.stop: defer_single_k1 }, { homeassistant.event: { event: keypad_double, data: { key: "1" } } } ]
-      - timing: [ "ON for at least ${hold_ms}" ]
-        then: [ { script.stop: defer_single_k1 }, { homeassistant.event: { event: keypad_hold, data: { key: "1" } } } ]
+      - timing:
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+          - "OFF for at most ${double_gap_ms}"
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+        then:
+          - script.stop: defer_single_k1
+          - homeassistant.event:
+              event: keypad_double
+              data:
+                key: "1"
+      - timing:
+          - "ON for at least ${hold_ms}"
+        then:
+          - script.stop: defer_single_k1
+          - homeassistant.event:
+              event: keypad_hold
+              data:
+                key: "1"
 
+  # --- Key "2" (r0 c1) ---
   - platform: matrix_keypad
     keypad_id: espdeck_keypad
     id: key_2
     row: 0
     col: 1
-    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k2 ] }
+    on_click:
+      min_length: ${click_min_ms}
+      max_length: ${click_max_ms}
+      then:
+        - script.execute: defer_single_k2
     on_multi_click:
-      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
-        then: [ { script.stop: defer_single_k2 }, { homeassistant.event: { event: keypad_double, data: { key: "2" } } } ]
-      - timing: [ "ON for at least ${hold_ms}" ]
-        then: [ { script.stop: defer_single_k2 }, { homeassistant.event: { event: keypad_hold, data: { key: "2" } } } ]
+      - timing:
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+          - "OFF for at most ${double_gap_ms}"
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+        then:
+          - script.stop: defer_single_k2
+          - homeassistant.event:
+              event: keypad_double
+              data:
+                key: "2"
+      - timing:
+          - "ON for at least ${hold_ms}"
+        then:
+          - script.stop: defer_single_k2
+          - homeassistant.event:
+              event: keypad_hold
+              data:
+                key: "2"
 
+  # --- Key "3" (r0 c2) ---
   - platform: matrix_keypad
     keypad_id: espdeck_keypad
     id: key_3
     row: 0
     col: 2
-    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k3 ] }
+    on_click:
+      min_length: ${click_min_ms}
+      max_length: ${click_max_ms}
+      then:
+        - script.execute: defer_single_k3
     on_multi_click:
-      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
-        then: [ { script.stop: defer_single_k3 }, { homeassistant.event: { event: keypad_double, data: { key: "3" } } } ]
-      - timing: [ "ON for at least ${hold_ms}" ]
-        then: [ { script.stop: defer_single_k3 }, { homeassistant.event: { event: keypad_hold, data: { key: "3" } } } ]
+      - timing:
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+          - "OFF for at most ${double_gap_ms}"
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+        then:
+          - script.stop: defer_single_k3
+          - homeassistant.event:
+              event: keypad_double
+              data:
+                key: "3"
+      - timing:
+          - "ON for at least ${hold_ms}"
+        then:
+          - script.stop: defer_single_k3
+          - homeassistant.event:
+              event: keypad_hold
+              data:
+                key: "3"
 
+  # --- Key "4" (r1 c0) ---
   - platform: matrix_keypad
     keypad_id: espdeck_keypad
     id: key_4
     row: 1
     col: 0
-    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k4 ] }
+    on_click:
+      min_length: ${click_min_ms}
+      max_length: ${click_max_ms}
+      then:
+        - script.execute: defer_single_k4
     on_multi_click:
-      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
-        then: [ { script.stop: defer_single_k4 }, { homeassistant.event: { event: keypad_double, data: { key: "4" } } } ]
-      - timing: [ "ON for at least ${hold_ms}" ]
-        then: [ { script.stop: defer_single_k4 }, { homeassistant.event: { event: keypad_hold, data: { key: "4" } } } ]
+      - timing:
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+          - "OFF for at most ${double_gap_ms}"
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+        then:
+          - script.stop: defer_single_k4
+          - homeassistant.event:
+              event: keypad_double
+              data:
+                key: "4"
+      - timing:
+          - "ON for at least ${hold_ms}"
+        then:
+          - script.stop: defer_single_k4
+          - homeassistant.event:
+              event: keypad_hold
+              data:
+                key: "4"
 
+  # --- Key "5" (r1 c1) ---
   - platform: matrix_keypad
     keypad_id: espdeck_keypad
     id: key_5
     row: 1
     col: 1
-    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k5 ] }
+    on_click:
+      min_length: ${click_min_ms}
+      max_length: ${click_max_ms}
+      then:
+        - script.execute: defer_single_k5
     on_multi_click:
-      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
-        then: [ { script.stop: defer_single_k5 }, { homeassistant.event: { event: keypad_double, data: { key: "5" } } } ]
-      - timing: [ "ON for at least ${hold_ms}" ]
-        then: [ { script.stop: defer_single_k5 }, { homeassistant.event: { event: keypad_hold, data: { key: "5" } } } ]
+      - timing:
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+          - "OFF for at most ${double_gap_ms}"
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+        then:
+          - script.stop: defer_single_k5
+          - homeassistant.event:
+              event: keypad_double
+              data:
+                key: "5"
+      - timing:
+          - "ON for at least ${hold_ms}"
+        then:
+          - script.stop: defer_single_k5
+          - homeassistant.event:
+              event: keypad_hold
+              data:
+                key: "5"
 
+  # --- Key "6" (r1 c2) ---
   - platform: matrix_keypad
     keypad_id: espdeck_keypad
     id: key_6
     row: 1
     col: 2
-    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k6 ] }
+    on_click:
+      min_length: ${click_min_ms}
+      max_length: ${click_max_ms}
+      then:
+        - script.execute: defer_single_k6
     on_multi_click:
-      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
-        then: [ { script.stop: defer_single_k6 }, { homeassistant.event: { event: keypad_double, data: { key: "6" } } } ]
-      - timing: [ "ON for at least ${hold_ms}" ]
-        then: [ { script.stop: defer_single_k6 }, { homeassistant.event: { event: keypad_hold, data: { key: "6" } } } ]
+      - timing:
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+          - "OFF for at most ${double_gap_ms}"
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+        then:
+          - script.stop: defer_single_k6
+          - homeassistant.event:
+              event: keypad_double
+              data:
+                key: "6"
+      - timing:
+          - "ON for at least ${hold_ms}"
+        then:
+          - script.stop: defer_single_k6
+          - homeassistant.event:
+              event: keypad_hold
+              data:
+                key: "6"
 
+  # --- Key "7" (r2 c0) ---
   - platform: matrix_keypad
     keypad_id: espdeck_keypad
     id: key_7
     row: 2
     col: 0
-    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k7 ] }
+    on_click:
+      min_length: ${click_min_ms}
+      max_length: ${click_max_ms}
+      then:
+        - script.execute: defer_single_k7
     on_multi_click:
-      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
-        then: [ { script.stop: defer_single_k7 }, { homeassistant.event: { event: keypad_double, data: { key: "7" } } } ]
-      - timing: [ "ON for at least ${hold_ms}" ]
-        then: [ { script.stop: defer_single_k7 }, { homeassistant.event: { event: keypad_hold, data: { key: "7" } } } ]
+      - timing:
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+          - "OFF for at most ${double_gap_ms}"
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+        then:
+          - script.stop: defer_single_k7
+          - homeassistant.event:
+              event: keypad_double
+              data:
+                key: "7"
+      - timing:
+          - "ON for at least ${hold_ms}"
+        then:
+          - script.stop: defer_single_k7
+          - homeassistant.event:
+              event: keypad_hold
+              data:
+                key: "7"
 
+  # --- Key "8" (r2 c1) ---
   - platform: matrix_keypad
     keypad_id: espdeck_keypad
     id: key_8
     row: 2
     col: 1
-    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k8 ] }
+    on_click:
+      min_length: ${click_min_ms}
+      max_length: ${click_max_ms}
+      then:
+        - script.execute: defer_single_k8
     on_multi_click:
-      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
-        then: [ { script.stop: defer_single_k8 }, { homeassistant.event: { event: keypad_double, data: { key: "8" } } } ]
-      - timing: [ "ON for at least ${hold_ms}" ]
-        then: [ { script.stop: defer_single_k8 }, { homeassistant.event: { event: keypad_hold, data: { key: "8" } } } ]
+      - timing:
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+          - "OFF for at most ${double_gap_ms}"
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+        then:
+          - script.stop: defer_single_k8
+          - homeassistant.event:
+              event: keypad_double
+              data:
+                key: "8"
+      - timing:
+          - "ON for at least ${hold_ms}"
+        then:
+          - script.stop: defer_single_k8
+          - homeassistant.event:
+              event: keypad_hold
+              data:
+                key: "8"
 
+  # --- Key "9" (r2 c2) ---
   - platform: matrix_keypad
     keypad_id: espdeck_keypad
     id: key_9
     row: 2
     col: 2
-    on_click: { min_length: ${click_min_ms}, max_length: ${click_max_ms}, then: [ script.execute: defer_single_k9 ] }
+    on_click:
+      min_length: ${click_min_ms}
+      max_length: ${click_max_ms}
+      then:
+        - script.execute: defer_single_k9
     on_multi_click:
-      - timing: [ "ON for ${click_min_ms} to ${click_max_ms}", "OFF for at most ${double_gap_ms}", "ON for ${click_min_ms} to ${click_max_ms}" ]
-        then: [ { script.stop: defer_single_k9 }, { homeassistant.event: { event: keypad_double, data: { key: "9" } } } ]
-      - timing: [ "ON for at least ${hold_ms}" ]
-        then: [ { script.stop: defer_single_k9 }, { homeassistant.event: { event: keypad_hold, data: { key: "9" } } } ]
+      - timing:
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+          - "OFF for at most ${double_gap_ms}"
+          - "ON for ${click_min_ms} to ${click_max_ms}"
+        then:
+          - script.stop: defer_single_k9
+          - homeassistant.event:
+              event: keypad_double
+              data:
+                key: "9"
+      - timing:
+          - "ON for at least ${hold_ms}"
+        then:
+          - script.stop: defer_single_k9
+          - homeassistant.event:
+              event: keypad_hold
+              data:
+                key: "9"
 
-# ========= Encoder: event-only (+1/-1 per tick) =========
+# ========= Encoder: event-only (+1 / -1), no value =========
 sensor:
   - platform: rotary_encoder
     id: encoder_raw
@@ -208,11 +433,18 @@ sensor:
     pin_b:
       number: ${ENC_B_PIN}
       mode: INPUT_PULLUP
+    # Tuning: 1, 2, or 4 (2 suits many EC11 encoders)
     resolution: 2
     on_clockwise:
-      - homeassistant.event: { event: encoder_step, data: { delta: 1 } }
+      - homeassistant.event:
+          event: encoder_step
+          data:
+            delta: 1
     on_anticlockwise:
-      - homeassistant.event: { event: encoder_step, data: { delta: -1 } }
+      - homeassistant.event:
+          event: encoder_step
+          data:
+            delta: -1
 
   # Uptime (seconds)
   - platform: uptime
