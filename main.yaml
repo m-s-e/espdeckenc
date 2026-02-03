@@ -11,7 +11,7 @@ substitutions:
   single_delay_ms: 180ms
 
 packages:
-  # GitHub shorthand (remote packages)
+  # GitHub shorthand for remote packages (officially supported)
   hardware: github://m-s-e/espdeckenc/hardware/${board}.yaml@main
   pins:     github://m-s-e/espdeckenc/pins/${board}.yaml@main
 
@@ -44,7 +44,16 @@ matrix_keypad:
     - pin:
         number: ${COL3_PIN}
         mode: ${COL3_MODE}
-  keys: ["1","2","3","4","5","6","7","8","9"]
+  keys:
+    - "1"
+    - "2"
+    - "3"
+    - "4"
+    - "5"
+    - "6"
+    - "7"
+    - "8"
+    - "9"
   debounce_ms: 5
 
 # Optional: shows last pressed key
