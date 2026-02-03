@@ -11,7 +11,7 @@ substitutions:
   single_delay_ms: 180ms
 
 packages:
-  # GitHub shorthand for remote packages (officially supported)
+  # Remote packages (GitHub shorthand)
   hardware: github://m-s-e/espdeckenc/hardware/${board}.yaml@main
   pins:     github://m-s-e/espdeckenc/pins/${board}.yaml@main
 
@@ -55,12 +55,6 @@ matrix_keypad:
     - "8"
     - "9"
   debounce_ms: 5
-
-# Optional: shows last pressed key
-text_sensor:
-  - platform: matrix_keypad
-    name: "${device_name} Keypad"
-    id: keypad_text
 
 # ========= Single-click deferral scripts (doubles cancel pending single) =========
 script:
@@ -431,8 +425,9 @@ binary_sensor:
               data:
                 key: "9"
 
-# ========= Encoder: event-only (+1 / -1), no value =========
+# ========= Sensors =========
 sensor:
+  # Rotary Encoder — event-only (+1 / -1 per step), hidden numeric value
   - platform: rotary_encoder
     id: encoder_raw
     internal: true
@@ -460,8 +455,14 @@ sensor:
     name: "${device_name} Uptime Seconds"
     id: uptime_seconds
 
-# ========= Uptime (formatted) =========
+# ========= Text sensors (single block) =========
 text_sensor:
+  # Optional: last pressed key from the matrix_keypad platform
+  - platform: matrix_keypad
+    name: "${device_name} Keypad"
+    id: keypad_text
+
+  # Uptime (formatted)
   - platform: template
     name: "${device_name} Uptime"
     id: uptime_pretty
