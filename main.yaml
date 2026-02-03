@@ -10,10 +10,11 @@ substitutions:
   hold_ms: 600ms
   single_delay_ms: 180ms
 
+
 packages:
-  # Remote packages (GitHub shorthand)
-  hardware: github://m-s-e/espdeckenc/hardware/${board}.yaml@main
-  pins:     github://m-s-e/espdeckenc/pins/${board}.yaml@main
+  hardware: !include hardware/${board}.yaml
+  pins:     !include pins/${board}.yaml
+
 
 # ========= Core services =========
 logger:
